@@ -1,8 +1,10 @@
 package my.customer.rewards.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.Map;
 
+@Schema(description = "Structured API error response.")
 public class ApiError {
     private final String timestamp = Instant.now().toString();
     private final int status;

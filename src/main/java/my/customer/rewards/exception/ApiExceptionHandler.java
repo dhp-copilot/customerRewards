@@ -2,9 +2,11 @@ package my.customer.rewards.exception;
 
 import org.springframework.http.*;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +43,18 @@ public class ApiExceptionHandler {
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiError> notFound(Exception ex, HttpServletRequest request) {
         return response(HttpStatus.NOT_FOUND, ex.getMessage(), request, null);
+    }
+
+    @ExceptionHandler({ConflictException.class, DataIntegrityViolationException.class})
+    public ResponseEntity<ApiError> conflict(Exception ex, HttpServletRequest request) {
+        return response(HttpStatus.CONFLICT, ex instanceof ConflictException
+                ? ex.getMessage() : "The request conflicts with an existing transaction",
+                request, null);
+    }
+
+    @ExceptionHandler({MissingRequestHeaderException.class, IllegalArgumentException.class})
+    public ResponseEntity<ApiError> badRequest(Exception ex, HttpServletRequest request) {
+        return response(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)

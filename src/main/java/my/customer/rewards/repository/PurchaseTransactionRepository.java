@@ -6,9 +6,18 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PurchaseTransactionRepository extends JpaRepository<PurchaseTransaction, Long> {
     List<PurchaseTransaction> findByCustomerUsernameOrderByTransactionDateAscIdAsc(String username);
+
+    Page<PurchaseTransaction> findByCustomerUsernameOrderByTransactionDateAscIdAsc(
+            String username, Pageable pageable);
+
+    Optional<PurchaseTransaction> findByCustomerUsernameAndIdempotencyKey(
+            String username, String idempotencyKey);
 
     List<PurchaseTransaction> findByCustomerUsernameAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
             String username, LocalDate from, LocalDate to);
