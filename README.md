@@ -67,7 +67,11 @@ GET /api/customers/{username}/transactions
 POST /api/customers/{username}/transactions
 ```
 
-The default Spring Security form-login page is replaced with stateless JWT authentication. API errors return JSON, invalid requests are validated, and protected API requests are limited to 100 requests per minute per client IP with HTTP `429` responses.
+The default Spring Security form-login page is replaced with stateless JWT authentication. API errors return JSON, invalid requests are validated, and protected API requests are limited to 100 requests per minute per client IP with HTTP `429` responses. Rate limiting is configured with `app.rate-limit.*`; forwarded client addresses are only accepted when the immediate proxy is explicitly trusted. Local buckets are bounded and expire to prevent unbounded memory growth.
+
+The current limiter intentionally uses local Bucket4j state. Before running multiple API instances, migrate the bucket store to a shared Redis-backed Bucket4j proxy (or equivalent shared backend) so limits are consistent across instances. Redis runtime dependencies are deliberately not included in this change.
+
+Transaction creation requires an `Idempotency-Key` header. A retry with the same customer, key, amount, and date returns the original transaction; reusing a key with a different payload returns `409 Conflict`. Transaction history is paginated with `page` (default `0`) and `size` (default `20`, maximum `100`).
 
 ## Swagger API documentation
 
@@ -91,4 +95,4 @@ Bearer <your-jwt-token>
 
 Swagger UI and the OpenAPI document are publicly accessible; protected business endpoints still require a valid JWT.
 
-The Maven test suite passes with 9 tests and no failures.
+The Maven test suite includes focused rate-limit, pagination, idempotency, audit, and OpenAPI coverage.
